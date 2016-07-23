@@ -14,5 +14,11 @@
     "url": "http://www.github.com/jake-shasteen/web_crawler.git"
   },
   "author": "Jake Shasteen (jakeshasteen@gmail.com)",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "morgan": "^1.7.0",
+    "rabbit.js": "^0.4.4"
+  }
 }
