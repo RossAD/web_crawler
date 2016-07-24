@@ -12,13 +12,20 @@ mongoose.connect( 'mongodb://' + DB );
 const RABBIT = process.env.RABBITHOST || 'localhost';
 
 const context = require( 'rabbit.js' ).createContext( 'amqp://' + RABBIT );
+// Handle queue errors
+context.on( 'error', ( error ) => {
+  console.error( error.message );
+  // TODO: If error is that the server is down, try reconnecting
+});
 context.on( 'ready', () => {
   var worker = context.socket('WORKER', {prefetch: 1});
   worker.setEncoding( 'utf8' );
   worker.connect( 'jobs', () => {
-    console.log( 'listening' );
+    console.log( 'Listening for messages' );
     worker.on( 'data', ( msg ) => {
-      console.log( 'msg', msg );
+      console.log("Received %s", msg );
+      // TODO: Scrape some stuff.
+      // TODO: Put it in the database.
       worker.ack();
     });
   });

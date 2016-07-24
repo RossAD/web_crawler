@@ -1,18 +1,22 @@
 'use strict';
+var Promise = require( 'bluebird' );
 
-const RABBIT = process.env.RABBITHOST || 'localhost';
+var Queue = function( context ) {
+  this.context = context;
+};
 
-var context = require( 'rabbit.js' ).createContext( 'amqp://' + RABBIT );
-
-context.on( 'error', ( error ) => {
-  console.error( error.message );
-});
-
-context.on( 'ready', () => {
-  var push = context.socket('PUSH')
-  push.connect( 'jobs', () => {
-    console.log( 'ready' );
-    push.write( 'test', 'utf8' );
-    console.log( 'sent test' );
+Queue.prototype.sendJob = function ( id, uri ) {
+  var self = this;
+  return new Promise( function( resolve, reject ) {
+    var push = self.context.socket( 'PUSH' );
+    push.on( 'error', () => { reject( 'Could not push job', id ) } );
+    push.connect( 'jobs', () => {
+      push.write( JSON.stringify( { id, uri } ), 'utf8' );
+      console.log( "Sent job ", id, "with", uri, "to queue." );
+      push.close();
+      resolve( true );
+    });
   });
-});
+}
+
+module.exports = Queue;

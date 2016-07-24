@@ -1,41 +1,47 @@
 'use strict';
 
 var db = require( '../db' );
-// var queue = require( './queue' );
+var Queue = require( './queue' );
+var queue = new Queue( require( './rabbit' ) );
 
 module.exports = {
 
   addToQueue: function( req, res ) {
     const uri = req.body.uri || req.body.url;
     
-    // if invalid URL, reply with 400
+    // TODO: Validate URI. If invalid URI, reply with 400
     // otherwise,
       db.create({ uri }).then( ( created ) => {
         return created._id;
       }).then( ( id ) => {
-        // queue.sendJob( id, url ).then( () => {
+        return queue.sendJob( id, uri ).then( () => {
           res.status( 201 ).send( id );
-        // })
-        // .catch( ( error ) => {
-        //   console.error( error );
-        //   res.status(500).send( error.message );
-        // });
+        });
       })
       .catch( ( error ) => {
         console.error( error );
-        res.status(500).send( error.message );
+        res.status( 500 ).send( error.message );
       });
   },
 
   getJobStatus: function( req, res ) {
-    const id = req.param('id');
-    // Check if ID in database
-      // If yes
-        // If the HTML has already been scraped,
-          // Reply with HTML
-        // Otherwise,
-          // Reply with "Still scraping <url>"
-      // Otherwise, reply with 404
+    const id = req.params.id;
+    db.findOne( req.params.id ).then( ( found ) => {
+      console.log( found );
+      if( found ) {
+        if( found.html ) {
+          res.status( 200 ).send( found.html );
+        } else {
+          res.status( 200 ).send( "Still scraping " + found.uri + "." );
+        }
+      } else {
+        res.status( 404 ).send( "Job ID not found." );
+      }
+    })
+    .catch( ( error ) => {
+      console.error( error );
+      res.status( 500 ).send( error.message );
+    });
   },
 
 };
