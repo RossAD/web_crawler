@@ -11,6 +11,21 @@ User submits www.google.com to the API. The user gets back a job id. The system 
 ```
   Dependencies: Node 6.2.1, RabbitMQ 3.6.1, MongoDB 3.2.8
   If you are using Mac OSX for development, installation of these is fairly straightforward using homebrew: `brew install <x>`
+  If this is your first time installing mongodb, you may have to `sudo mkdir /data/db`
+  If this is your first time installing RabbitMQ, you may have to add `/usr/local/sbin` to your $PATH
+
+  Make sure to run npm install in the web_crawler directory.
+
+  You can start each service separately:
+    1. mongod
+    2. rabbitmq-server
+    3. node worker for each worker
+    4. node web
+
+  I have also written a bash script that should start all of the above for you.
+    npm start [number of workers]
+
+  After all processes are running, the web server exposes two REST API endpoints:
 ```
 
 
