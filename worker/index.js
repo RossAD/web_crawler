@@ -1,18 +1,6 @@
 'use strict';
 const http = require( 'http' );
 const Promise = require( 'bluebird' );
-/* Connect to database */
-const db = require( '../db' );
-
-/* Connect to queuing service */
-const RABBIT = process.env.RABBITHOST || 'localhost';
-
-const context = require( 'rabbit.js' ).createContext( 'amqp://' + RABBIT );
-// Handle queue errors
-context.on( 'error', ( error ) => {
-  console.error( error.message );
-  // TODO: If error is that the server is down, try reconnecting
-});
 
 const scrapeSite = function( site ) {
   return new Promise( function( resolve, reject ) {
@@ -39,25 +27,50 @@ const addToDatabase = function( id, html ) {
 }
 
 // Listen for jobs
-context.on( 'ready', () => {
-  var worker = context.socket( 'WORKER', {prefetch: 1});
-  worker.setEncoding( 'utf8' );
-  worker.connect( 'jobs', () => {
-    console.log( 'Listening for messages' );
-    worker.on( 'data', ( msg ) => {
-      console.log( 'Received %s', msg );
-      var id, uri;
-      ({ id, uri } = JSON.parse(msg));
-      scrapeSite( uri ).then( ( html ) => {
-        return addToDatabase( id, html );
-      }).then( () => {
-        console.log( id + ": " + uri + " scraped and added to database." )
-        worker.ack();
-      }).catch( ( error ) => {
-        console.error( error.message );
-        worker.ack();
-      })
+const init = function( db, context ) {
+
+  // Handle queue errors
+  context.on( 'error', ( error ) => {
+    console.error( error.message );
+    // TODO: If error is that the server is down, try reconnecting
+  });
+
+  context.on( 'ready', () => {
+    var worker = context.socket( 'WORKER', {prefetch: 1});
+    worker.setEncoding( 'utf8' );
+    worker.connect( 'jobs', () => {
+      console.log( 'Listening for messages' );
+      worker.on( 'data', ( msg ) => {
+        console.log( 'Received %s', msg );
+        var id, uri;
+        ({ id, uri } = JSON.parse( msg ) );
+        scrapeSite( uri ).then( ( html ) => {
+          return addToDatabase( id, html );
+        }).then( () => {
+          console.log( id + ": " + uri + " scraped and added to database." )
+          worker.ack();
+        }).catch( ( error ) => {
+          console.error( error.message );
+          worker.ack();
+        })
+      });
     });
   });
-});
+}
 
+if( module.parent ) {
+  module.exports = {
+    init,
+    addToDatabase,
+    scrapeSite
+  }
+} else {
+  /* Connect to database */
+  const db = require( '../db' );
+
+  /* Connect to queuing service */
+  const RABBIT = process.env.RABBITHOST || 'localhost';
+
+  const context = require( 'rabbit.js' ).createContext( 'amqp://' + RABBIT );
+  init( db, context );
+}

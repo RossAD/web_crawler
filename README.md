@@ -31,7 +31,7 @@ User submits www.google.com to the API. The user gets back a job id. The system 
 
 ## REST API endpoints:
 ```
-POST   /api/scrape     Submits a URL to be scraped. Responds with a job ID.
+POST   /api/scrape    Submits a URL to be scraped, expecting 'uri' or 'url' in body as JSON. Responds with a job ID.
 GET    /api/job/:id   Requests status on a job of given ID. Responds with a site's HTML if complete.
 ```
 

@@ -18,7 +18,7 @@ module.exports = {
         });
       })
       .catch( ( error ) => {
-        console.error( error );
+        console.error( error.message );
         res.status( 500 ).send( error.message );
       });
   },
@@ -26,7 +26,6 @@ module.exports = {
   getJobStatus: function( req, res ) {
     const id = req.params.id;
     db.findOne( req.params.id ).then( ( found ) => {
-      console.log( found );
       if( found ) {
         if( found.html ) {
           res.status( 200 ).send( found.html );
@@ -38,7 +37,7 @@ module.exports = {
       }
     })
     .catch( ( error ) => {
-      console.error( error );
+      console.error( error.message );
       res.status( 500 ).send( error.message );
     });
   },
