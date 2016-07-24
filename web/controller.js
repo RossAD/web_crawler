@@ -8,7 +8,6 @@ module.exports = {
 
   addToQueue: function( req, res ) {
     const uri = req.body.uri || req.body.url;
-    
     // TODO: Validate URI. If invalid URI, reply with 400
     // otherwise,
       db.create({ uri }).then( ( created ) => {
