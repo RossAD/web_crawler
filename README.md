@@ -39,8 +39,8 @@ GET    /api/job/:id   Requests status on a job of given ID. Responds with a site
   The system consists of four parts:
   1. A web server that exposes 2 RESTful API endpoints.
   2. A queuing system that manages flow of jobs from the web server(s) to one or more web workers.
-  3. Web workers that extract the html from a given page and place that information in a persistant data store.
-  4. A persistant data store.
+  3. Web workers that extract the html from a given page and place that information in a persistent data store.
+  4. A persistent data store.
 
 ### Technologies:
   Node.js, Express, RabbitMQ, MongoDB, Chai, Supertest
