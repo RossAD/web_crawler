@@ -52,5 +52,6 @@ GET    /api/job/:id   Requests status on a job of given ID. Responds with a site
   
   I chose to use RabbitMQ despite the extra cost in installation rather than something like a cronjob because it is very robust and helps to protect against failures. Also because of scaling concerns: If I were to continue to scale this upward with multiple web servers and/or workers, RabbitMQ can help to handle the input from multiple servers and also distributes the load to multiple workers.
 
-  ### Tests:
-    Use `npm test` to run test suite.
+### Tests:
+  Use `npm test` to run test suite.
+  
