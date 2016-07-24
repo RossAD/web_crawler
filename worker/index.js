@@ -42,6 +42,8 @@ const init = function( db, context ) {
   });
 
   context.on( 'ready', () => {
+    // using prefetch: 1 balances load using fair dispatch strategy rather
+    // than round robin 
     var worker = context.socket( 'WORKER', {prefetch: 1});
     worker.setEncoding( 'utf8' );
     worker.connect( 'jobs', () => {
