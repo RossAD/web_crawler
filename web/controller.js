@@ -8,24 +8,25 @@ module.exports = {
 
   addToQueue: function( req, res ) {
     const uri = req.body.uri || req.body.url;
-    // TODO: Validate URI. If invalid URI, reply with 400
-    // otherwise,
-      db.create({ uri }).then( ( created ) => {
-        return created._id;
-      }).then( ( id ) => {
-        return queue.sendJob( id, uri ).then( () => {
-          res.status( 201 ).send( id );
-        });
-      })
-      .catch( ( error ) => {
-        console.error( error.message );
-        res.status( 500 ).send( error.message );
+    db.create({ uri }).then( ( created ) => {
+      return created.id;
+    }).then( ( id ) => {
+      return queue.sendJob( id, uri ).then( () => {
+        res.status( 201 ).send( id );
       });
+    })
+    .catch( ( error ) => {
+      if( error.name === 'ValidationError' ) {
+        res.status( 400 ).send( "uri or url required in request body" );
+      } else {
+        res.status( 500 ).send( error.message );
+      }
+    });
   },
 
   getJobStatus: function( req, res ) {
     const id = req.params.id;
-    db.findOne( req.params.id ).then( ( found ) => {
+    db.findOne({ _id: req.params.id }).then( ( found ) => {
       if( found ) {
         if( found.html ) {
           res.status( 200 ).send( found.html );
@@ -37,8 +38,11 @@ module.exports = {
       }
     })
     .catch( ( error ) => {
-      console.error( error.message );
-      res.status( 500 ).send( error.message );
+      if( error.name === 'CastError' && error.kind === 'ObjectId' ) {
+        res.status( 400 ).send( "Invalid ID" );
+      } else {
+        res.status( 500 ).send( error.message );
+      }
     });
   },
 

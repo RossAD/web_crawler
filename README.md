@@ -28,12 +28,12 @@ User submits www.google.com to the API. The user gets back a job id. The system 
   After all processes are running, the web server exposes two REST API endpoints:
 ```
 
-
-## REST API endpoints:
+### REST API endpoints:
 ```
 POST   /api/scrape    Submits a URL to be scraped, expecting 'uri' or 'url' in body as JSON. Responds with a job ID.
 GET    /api/job/:id   Requests status on a job of given ID. Responds with a site's HTML if complete.
 ```
+
 
 ### Architecture:
   The system consists of four parts:
@@ -51,3 +51,6 @@ GET    /api/job/:id   Requests status on a job of given ID. Responds with a site
   I chose to use MongoDB because the key-value store allows me to sync keys with job IDs, and because if this were to scale even further MongoDB could be broken out and run on its own machine. If I were to use something like, say, the file system to store the collected HTML in order to make the system more lightweight I would have to then devise a way to generate keys and otherwise manage the database. If I were to use something like Redis, I would potentially lose information if the system died. Using MongoDB has the added cost of installation difficulties, but in scaling this could be automated through the use of something like Docker. If the 'job' API endpoint were directed toward a given URL rather than a specific job ID, I would also worry about duplicating already-scraped pages, but that was not a concern. 
   
   I chose to use RabbitMQ despite the extra cost in installation rather than something like a cronjob because it is very robust and helps to protect against failures. Also because of scaling concerns: If I were to continue to scale this upward with multiple web servers and/or workers, RabbitMQ can help to handle the input from multiple servers and also distributes the load to multiple workers.
+
+  ### Tests:
+    Use `npm test` to run test suite.

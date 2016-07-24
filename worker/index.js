@@ -3,6 +3,12 @@ const http = require( 'http' );
 const Promise = require( 'bluebird' );
 
 const scrapeSite = function( site ) {
+  var re = new RegExp("^(http|https)://", "i");
+  var match = re.test(site);
+  if( !match ) {
+    site = 'http://' + site;
+  }
+
   return new Promise( function( resolve, reject ) {
     http.get( site, ( response ) => {
       let body = '';
@@ -17,13 +23,13 @@ const scrapeSite = function( site ) {
         reject( error );
       });
     }).on( 'error', ( error ) => {
-      console.error( "Failed to resolve DNS", error.message );
+      reject( error );
     });
   });
 };
 
-const addToDatabase = function( id, html ) {
-  return db.findOneAndUpdate( id, { html } );
+const addToDatabase = function( db, id, html ) {
+  return db.findOneAndUpdate( { _id: id }, { html } );
 }
 
 // Listen for jobs
@@ -45,7 +51,7 @@ const init = function( db, context ) {
         var id, uri;
         ({ id, uri } = JSON.parse( msg ) );
         scrapeSite( uri ).then( ( html ) => {
-          return addToDatabase( id, html );
+          return addToDatabase( db, id, html );
         }).then( () => {
           console.log( id + ": " + uri + " scraped and added to database." )
           worker.ack();
@@ -56,8 +62,10 @@ const init = function( db, context ) {
       });
     });
   });
-}
+};
 
+// Module.parent denotes that the module is being called by require()
+// This is for testing purposes
 if( module.parent ) {
   module.exports = {
     init,
