@@ -10,6 +10,6 @@ const JobsSchema = new mongoose.Schema({
   html: String,
 });
 
-module.exports = function( database ) {
+module.exports = ( database ) => {
   return database.model( 'jobs', JobsSchema, 'jobs' );
 }

@@ -2,14 +2,14 @@
 const http = require( 'http' );
 const Promise = require( 'bluebird' );
 
-const scrapeSite = function( site ) {
-  var re = new RegExp("^(http|https)://", "i");
-  var match = re.test(site);
+const scrapeSite = ( site ) => {
+  const re = new RegExp("^(http|https)://", "i");
+  const match = re.test(site);
   if( !match ) {
     site = 'http://' + site;
   }
 
-  return new Promise( function( resolve, reject ) {
+  return new Promise( ( resolve, reject ) => {
     http.get( site, ( response ) => {
       let body = '';
       if ( response.statusCode !== 200 ) resolve( "Site not available." );
@@ -28,12 +28,12 @@ const scrapeSite = function( site ) {
   });
 };
 
-const addToDatabase = function( db, id, html ) {
+const addToDatabase = ( db, id, html ) => {
   return db.findOneAndUpdate( { _id: id }, { html } );
 }
 
 // Listen for jobs
-const init = function( db, context ) {
+const init = ( db, context ) => {
 
   // Handle queue errors
   context.on( 'error', ( error ) => {
@@ -44,13 +44,13 @@ const init = function( db, context ) {
   context.on( 'ready', () => {
     // using prefetch: 1 balances load using fair dispatch strategy rather
     // than round robin 
-    var worker = context.socket( 'WORKER', {prefetch: 1});
+    const worker = context.socket( 'WORKER', {prefetch: 1});
     worker.setEncoding( 'utf8' );
     worker.connect( 'jobs', () => {
       console.log( 'Listening for messages' );
       worker.on( 'data', ( msg ) => {
         console.log( 'Received %s', msg );
-        var id, uri;
+        let id, uri;
         ({ id, uri } = JSON.parse( msg ) );
         scrapeSite( uri ).then( ( html ) => {
           return addToDatabase( db, id, html );

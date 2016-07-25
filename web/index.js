@@ -9,7 +9,7 @@ app.set( 'port', process.env.WEB_PORT || 3000 );
 if( module.parent ) {
   module.exports = app;
 } else {
-  const server = http.listen( app.get( 'port' ), function() {
+  const server = http.listen( app.get( 'port' ), () => {
     console.log( 'Express server listening on ' + server.address().port );
   }); 
 }

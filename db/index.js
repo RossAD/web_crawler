@@ -9,6 +9,6 @@ const DB = ( process.env.DBHOST || 'localhost' )
 
 mongoose.connect( 'mongodb://' + DB );
 
-var Jobs = require( './jobsModel' )( mongoose );
+const Jobs = require( './jobsModel' )( mongoose );
 
 module.exports = Jobs;

@@ -1,12 +1,12 @@
 'use strict';
 
-var db = require( '../db' );
-var Queue = require( './queue' );
-var queue = new Queue( require( './rabbit' ) );
+const db = require( '../db' );
+const Queue = require( './queue' );
+const queue = new Queue( require( './rabbit' ) );
 
 module.exports = {
 
-  addToQueue: function( req, res ) {
+  addToQueue: ( req, res ) => {
     const uri = req.body.uri || req.body.url;
     db.create({ uri }).then( ( created ) => {
       return created.id;
@@ -24,7 +24,7 @@ module.exports = {
     });
   },
 
-  getJobStatus: function( req, res ) {
+  getJobStatus: ( req, res ) => {
     const id = req.params.id;
     db.findOne({ _id: req.params.id }).then( ( found ) => {
       if( found ) {
